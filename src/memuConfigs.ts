@@ -132,8 +132,19 @@ export const defaultConfigs: Config = {
                 selector: "",
                 ctxmenu: false,
                 enable: true
+            }, 
+            {
+                class: "cs-font-size",
+                type: "fontSize",
+                icon: "type",
+                name: "Font size",
+                cat: "",
+                selector: "",
+                ctxmenu: false,
+                enable: true
             }
         ],
+
         subMenuItems: {
             border: [
                 {
@@ -294,11 +305,37 @@ export const defaultConfigs: Config = {
                     selector: "",
                     enable: true
                 },
-                {
+                                {
                     class: "cs-line-thicker",
                     type: "lineThickness",
                     icon: "cs-thicker++",
                     name: "Thicker++",
+                    selector: "",
+                    enable: true
+                }
+            ], 
+            fontSize: [
+                {
+                    class: "canvas-font-small",
+                    type: "fontSize",
+                    icon: "heading-6",
+                    name: "Small (10px)",
+                    selector: "",
+                    enable: true
+                },
+                {
+                    class: "canvas-font-medium",
+                    type: "fontSize",
+                    icon: "heading-4",
+                    name: "Medium (20px)",
+                    selector: "",
+                    enable: true
+                },
+                {
+                    class: "canvas-font-large",
+                    type: "fontSize",
+                    icon: "heading-1",
+                    name: "Large (60px)",
                     selector: "",
                     enable: true
                 }
