@@ -1,55 +1,75 @@
-import { Plugin, Editor, SuggestModal } from 'obsidian';
+import { App, Plugin, Editor, SuggestModal } from 'obsidian';
 
+// Улучшили интерфейс: теперь храним размер и стиль отдельно
 interface SizeOption {
     label: string;
-    value: string | null;
+    size: string | null;
+    isBold: boolean;
 }
 
 class SizeSuggestModal extends SuggestModal<SizeOption> {
     editor: Editor;
 
-    constructor(app: any, editor: Editor) {
+    constructor(app: App, editor: Editor) {
         super(app);
         this.editor = editor;
-        this.setPlaceholder("Выберите размер текста");
+        this.setPlaceholder("Выберите размер и стиль текста");
     }
 
     getSuggestions(query: string): SizeOption[] {
         const options: SizeOption[] = [
-            { label: "❌ Очистить форматирование", value: null },
-            { label: "10 px", value: "10" },
-            { label: "20 px", value: "20" },
-            { label: "30 px", value: "30" },
-            { label: "40 px", value: "40" },
-            { label: "50 px", value: "50" },
-            { label: "60 px", value: "60" }
+            { label: "❌ Очистить форматирование", size: null, isBold: false },
+            { label: "10 px", size: "10", isBold: false },
+            { label: "10 px (Жирный)", size: "10", isBold: true },
+            { label: "20 px", size: "20", isBold: false },
+            { label: "20 px (Жирный)", size: "20", isBold: true },
+            { label: "30 px", size: "30", isBold: false },
+            { label: "30 px (Жирный)", size: "30", isBold: true },
+            { label: "40 px", size: "40", isBold: false },
+            { label: "40 px (Жирный)", size: "40", isBold: true },
+            { label: "50 px", size: "50", isBold: false },
+            { label: "50 px (Жирный)", size: "50", isBold: true },
+            { label: "60 px", size: "60", isBold: false },
+            { label: "60 px (Жирный)", size: "60", isBold: true }
         ];
         return options.filter(o => o.label.toLowerCase().includes(query.toLowerCase()));
     }
 
+    // Красивая отрисовка в меню: жирные пункты показываем жирным!
     renderSuggestion(option: SizeOption, el: HTMLElement) {
-        el.createEl("div", { text: option.label });
+        const div = el.createEl("div", { text: option.label });
+        if (option.isBold) {
+            div.style.fontWeight = "bold";
+        }
     }
 
     onChooseSuggestion(option: SizeOption, evt: MouseEvent | KeyboardEvent) {
         const selection = this.editor.getSelection();
-        // Убираем старые теги перед наложением новых
-        const cleanText = selection.replace(/<span style="font-size: [^>]*">/g, "").replace(/<\/span>/g, "");
         
-        if (option.value === null) {
+        // Регулярку тоже сделал чуть умнее: теперь она чистит ЛЮБЫЕ наши спаны со стилями
+        const cleanText = selection
+            .replace(/<span style="[^>]*">/g, "")
+            .replace(/<\/span>/g, "");
+        
+        if (option.size === null) {
             this.editor.replaceSelection(cleanText);
         } else {
-            this.editor.replaceSelection(`<span style="font-size: ${option.value}px; line-height: 1.2;">${cleanText}</span>`);
+            // Формируем строчку с font-weight, если нужно
+            const boldStyle = option.isBold ? " font-weight: bold;" : "";
+            
+            // Собираем финальный тег (с твоим inline-block)
+            const styleString = `font-size: ${option.size}px; line-height: 1.2; display: inline-block;${boldStyle}`;
+            this.editor.replaceSelection(`<span style="${styleString}">${cleanText}</span>`);
         }
     }
 }
 
-export default class TextResizerPlugin extends Plugin {
+export default class CanvasFontSizePlugin extends Plugin {
     async onload() {
         this.addCommand({
             id: 'open-text-size-modal',
             name: 'Изменить размер текста',
-            icon: 'a-large-small', // Та самая иконка Aa
+            icon: 'a-large-small', 
             editorCallback: (editor: Editor) => {
                 new SizeSuggestModal(this.app, editor).open();
             }
